@@ -1,47 +1,40 @@
-import { useThree, extend, useFrame } from '@react-three/fiber'
+import { MeshReflectorMaterial, Float, Text, Html,  PivotControls, TransformControls, OrbitControls } from "@react-three/drei"
 import { useRef } from 'react'
-import { AmbientLight, DirectionalLight } from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import CustomObject from './CustomObject.jsx'
-
-extend({ OrbitControls })
 
 export default function Experience()
 {
-    const { camera, gl } = useThree()
-    const cubeRef = useRef()
-    const groupRef = useRef()
-    useFrame((state, delta) =>
-    {
-        //const angle = state.clock.elapsedTime
-        cubeRef.current.rotation.y += delta
-        // state.camera.position.x = Math.sin(angle) * 8
-        // state.camera.position.z = Math.cos(angle) * 8
-        // state.camera.lookAt(0, 0, 0)
-        //groupRef.current.rotation.y += delta
-    })
+    const cube = useRef()
+    const sphere = useRef()
+
     return <>
-        <orbitControls args={[ camera, gl.domElement ]} />
+        <OrbitControls makeDefault />
+        <directionalLight position={ [ 1, 2, 3 ] } intensity={ 1 } />
+        <ambientLight intensity={ 0.5 } />
 
-        <directionalLight position={[ 1, 2, 3 ]} intensity={ 1.5 } />
-        <ambientLight intensity={ 0.5} />
-
-        <group ref={ groupRef }>
-            <mesh position-x={ -2 }>
+        <PivotControls anchor={[ 0, 0, 0 ]} depthTest={ false } lineWidth={ 1 } scale={ 2 }>
+            <mesh ref={ sphere } position-x={ - 2 }>
                 <sphereGeometry />
-                <meshStandardMaterial color='orange' wireframe={false} />
-            </mesh>    
-            <mesh ref={ cubeRef } rotation-y={ Math.PI * 0.25 } position-x={ 2 } scale={ 1.5 }>
-                <boxGeometry />
-                <meshStandardMaterial color='mediumpurple' wireframe={false} />
+                <meshStandardMaterial color="orange" />
+                <Html position={[ 1, 1, 0 ]} wrapperClass="label" center distanceFactor={ 6 } occlude={[ sphere, cube ]}>That's a sphere </Html>
             </mesh>
-        </group>    
-        <mesh rotation-x={ -Math.PI * 0.5 } position-y={ -1 } scale={ 10 }>
+        </PivotControls>
+
+        <mesh ref={ cube } position-x={ 2 } scale={ 1.5 }>
+            <boxGeometry />
+            <meshStandardMaterial color="mediumpurple" />
+        </mesh>
+        <TransformControls object={ cube } mode='translate'/>
+
+        <mesh position-y={ - 1 } rotation-x={ - Math.PI * 0.5 } scale={ 10 }>
             <planeGeometry />
-            <meshStandardMaterial color='greenyellow' wireframe={false} />
-        </mesh>    
+            <MeshReflectorMaterial color="greenyellow" resolution={ 512 } mirror={ 0.5 }/>
+        </mesh>
 
-        <CustomObject />
+        <Float speed={ 3 } floatIntensity={ 2 }>
+            <Text font='./Roboto-Black.woff' fontSize={ 1 } color='salmon' position-y={ 3 } maxWidth={ 7} textAlign="center">
+            I LOVE Леночку и Сонечку
+            <meshNormalMaterial />
+            </Text>
+        </Float>
     </>
-
 }
