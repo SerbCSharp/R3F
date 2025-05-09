@@ -1,40 +1,59 @@
-import { MeshReflectorMaterial, Float, Text, Html,  PivotControls, TransformControls, OrbitControls } from "@react-three/drei"
-import { useRef } from 'react'
+import { OrbitControls } from '@react-three/drei'
+import { button, useControls } from 'leva'
+import { Perf } from 'r3f-perf'
 
 export default function Experience()
 {
-    const cube = useRef()
-    const sphere = useRef()
+    const { perfVisible } = useControls({
+        perfVisible: true
+    })
+    const { position, color, visible } = useControls('sphere', { 
+        position:
+        {
+            value: { x: -2, y: 0 },
+            min: -4,
+            max: 4,
+            step: 1,
+            joystick: 'invertY'
+        },
+        color: '#ff0000',
+        visible: true,
+        clickMe: button(() => { console.log('ok')}),
+        choice: { options: [ 'a', 'b', 'c'] }
+    })
+        const { scale } = useControls('cube', { 
+        scale:
+        {
+            value: 1.5,
+            min: 0,
+            max: 5,
+            step: 1
+        }
+    })
 
     return <>
+
+        {perfVisible && <Perf position="top-left" />}
+
         <OrbitControls makeDefault />
+
         <directionalLight position={ [ 1, 2, 3 ] } intensity={ 1 } />
         <ambientLight intensity={ 0.5 } />
 
-        <PivotControls anchor={[ 0, 0, 0 ]} depthTest={ false } lineWidth={ 1 } scale={ 2 }>
-            <mesh ref={ sphere } position-x={ - 2 }>
-                <sphereGeometry />
-                <meshStandardMaterial color="orange" />
-                <Html position={[ 1, 1, 0 ]} wrapperClass="label" center distanceFactor={ 6 } occlude={[ sphere, cube ]}>That's a sphere </Html>
-            </mesh>
-        </PivotControls>
+        <mesh position={ [position.x, position.y, 0] } visible={ visible }>
+            <sphereGeometry />
+            <meshStandardMaterial color={ color} />
+        </mesh>
 
-        <mesh ref={ cube } position-x={ 2 } scale={ 1.5 }>
+        <mesh position-x={ 2 } scale={ scale }>
             <boxGeometry />
             <meshStandardMaterial color="mediumpurple" />
         </mesh>
-        <TransformControls object={ cube } mode='translate'/>
 
         <mesh position-y={ - 1 } rotation-x={ - Math.PI * 0.5 } scale={ 10 }>
             <planeGeometry />
-            <MeshReflectorMaterial color="greenyellow" resolution={ 512 } mirror={ 0.5 }/>
+            <meshStandardMaterial color="greenyellow" />
         </mesh>
 
-        <Float speed={ 3 } floatIntensity={ 2 }>
-            <Text font='./Roboto-Black.woff' fontSize={ 1 } color='salmon' position-y={ 3 } maxWidth={ 7} textAlign="center">
-            I LOVE Леночку и Сонечку
-            <meshNormalMaterial />
-            </Text>
-        </Float>
     </>
 }
