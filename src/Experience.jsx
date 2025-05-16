@@ -31,8 +31,6 @@ export default function Experience()
     
     useFrame((state, delta) =>
     {
-        // const time = state.clock.elapsedTime
-        // cube.current.position.x = 2 + Math.sin(time)
         cube.current.rotation.y += delta * 0.2
     })
 
@@ -44,49 +42,6 @@ export default function Experience()
 
         <OrbitControls makeDefault />
         
-        {/* <BakeShadows /> */}
-        {/* <SoftShadows size={ 25 } samples={ 10 } focus={ 0 } /> */}
-
-        {/* <Environment
-            background
-            // files={ [
-            //     './environmentMaps/2/px.jpg',
-            //     './environmentMaps/2/nx.jpg',
-            //     './environmentMaps/2/py.jpg',
-            //     './environmentMaps/2/ny.jpg',
-            //     './environmentMaps/2/pz.jpg',
-            //     './environmentMaps/2/nz.jpg',
-            // ] }
-            // files="./environmentMaps/the_sky_is_on_fire_2k.hdr"
-            preset="sunset"
-            resolution={ 32 }
-            ground={ {
-                height: envMapHeight,
-                radius: envMapRadius,
-                scale: envMapScale
-            } }
-        >
-        </Environment> */}
-
-        {/* <AccumulativeShadows
-            position={ [ 0, - 0.99, 0 ] }
-            scale={ 10 }
-            color="#316d39"
-            opacity={ 0.8 }
-            frames={ Infinity }
-            temporal
-            blend={ 100 }
-        >
-            <RandomizedLight
-                amount={ 8 }
-                radius={ 1 }
-                ambient={ 0.5 }
-                intensity={ 3 }
-                position={ [ 1, 2, 3 ] }
-                bias={ 0.001 }
-            />
-        </AccumulativeShadows> */}
-
         <Sky sunPosition={ sunPosition } />
 
         <directionalLight
