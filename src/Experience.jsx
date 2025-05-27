@@ -1,68 +1,63 @@
-import { useMatcapTexture, Center, Text3D, OrbitControls } from '@react-three/drei'
-import { Perf } from 'r3f-perf'
-import { useRef, useEffect, useState } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { shaderMaterial, Sparkles, Center, useTexture, useGLTF, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
+import { useRef } from 'react'
+import { useFrame, extend } from '@react-three/fiber'
+import portalVertexShader from './shaders/portal/vertex.glsl'
+import portalFragmentShader from './shaders/portal/fragment.glsl'
 
-const torusGeometry = new THREE.TorusGeometry(1, 0.6, 16, 32)
-const material = new THREE.MeshMatcapMaterial()
+const PortalMaterial = shaderMaterial(
+    {
+        uTime: 0,
+        uColorStart: new THREE.Color('#ffffff'),
+        uColorEnd: new THREE.Color('#000000')
+    },
+    portalVertexShader,
+    portalFragmentShader
+)
+
+extend({ PortalMaterial })
 
 export default function Experience()
 {
-    const donuts = useRef([])
-    // const donutsGroup = useRef()
-    // const [ torusGeometry, setTorusGeometry] = useState()
-    // const [ material, setMaterial] = useState()
-    const [matcapTexture] = useMatcapTexture('7B5254_E9DCC7_B19986_C8AC91', 256)
+    const { nodes } = useGLTF('./model/portal.glb')
+    const bakedTexture = useTexture('./model/baked.jpg')
+    bakedTexture.flipY = false
 
-    useEffect(() => {
-        matcapTexture.encoding = THREE.sRGBEncoding
-        matcapTexture.needsUpdate = true
-        material.matcap = matcapTexture
-        material.needsUpdate = true
-    }, [])
-
+    const portalMaterial = useRef()
     useFrame((state, delta) =>
     {
-        for(const donut of donuts.current)
-        {
-            donut.rotation.y += delta * 0.2
-        }
+        portalMaterial.current.uTime += delta
     })
 
     return <>
 
-        <Perf position="top-left" />
-
         <OrbitControls makeDefault />
-        {/* <torusGeometry ref={setTorusGeometry} args={[ 1, 0.6, 16, 32 ]} />
-        <meshMatcapMaterial ref={setMaterial} matcap={ matcapTexture } /> */}
+
+        <color args={['#201919']} attach="background" />
 
         <Center>
-            <Text3D font="./fonts/helvetiker_regular.typeface.json"
-                size={ 0.75 }
-                height={0.2 }
-                curveSegments={ 12 }
-                bevelEnabled
-                bevelThickness={ 0.02 }
-                bevelSize={ 0.02 }
-                bevelOffset={ 0 }
-                bevelSegments={ 5 }
-                material={material}
-            >
-                Hello R3F
-            </Text3D>
+            <mesh geometry={ nodes.baked.geometry }>
+                <meshBasicMaterial map={ bakedTexture } />
+            </mesh>
+            <mesh geometry={ nodes.poleLightA.geometry } position={ nodes.poleLightA.position }>
+                <meshBasicMaterial color="#ffffe5" />
+            </mesh>
+            <mesh geometry={ nodes.poleLightB.geometry } position={ nodes.poleLightB.position }>
+                <meshBasicMaterial color="#ffffe5" />
+            </mesh>
+            <mesh geometry={ nodes.portalLight.geometry } position={ nodes.portalLight.position } rotation={ nodes.portalLight.rotation }>
+                {/* <shaderMaterial
+                    vertexShader={ portalVertexShader }
+                    fragmentShader={ portalFragmentShader }
+                    uniforms={{
+                        uTime: {value: 0 },
+                        uColorStart: {value: new THREE.Color('#ffffff')},
+                        uColorEnd: {value: new THREE.Color('#000000')},
+                    }}
+                /> */}
+                <portalMaterial ref={ portalMaterial } />
+            </mesh>
+            <Sparkles size={ 6 } scale={[4, 2, 4]} position-y={ 1 } speed={ 0.2 } count={ 40 } />
         </Center>
-        {/* <group ref={donutsGroup}> */}
-            {[...Array(100)].map((value, index) => 
-                <mesh key={index} position={[(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10]}
-                    scale={ 0.2 + Math.random() * 0.2}
-                    rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}
-                    geometry={torusGeometry}
-                    material={material}
-                    ref={(element) => donuts.current[index] = element} />
-            )}
-            {/* </group> */}
-
     </>
 }
