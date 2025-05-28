@@ -1,63 +1,49 @@
-import { shaderMaterial, Sparkles, Center, useTexture, useGLTF, OrbitControls } from '@react-three/drei'
-import * as THREE from 'three'
+import { useFrame } from '@react-three/fiber'
+import { useBVH, meshBounds, OrbitControls } from '@react-three/drei'
 import { useRef } from 'react'
-import { useFrame, extend } from '@react-three/fiber'
-import portalVertexShader from './shaders/portal/vertex.glsl'
-import portalFragmentShader from './shaders/portal/fragment.glsl'
-
-const PortalMaterial = shaderMaterial(
-    {
-        uTime: 0,
-        uColorStart: new THREE.Color('#ffffff'),
-        uColorEnd: new THREE.Color('#000000')
-    },
-    portalVertexShader,
-    portalFragmentShader
-)
-
-extend({ PortalMaterial })
 
 export default function Experience()
 {
-    const { nodes } = useGLTF('./model/portal.glb')
-    const bakedTexture = useTexture('./model/baked.jpg')
-    bakedTexture.flipY = false
-
-    const portalMaterial = useRef()
+    const cube = useRef()
+    
     useFrame((state, delta) =>
     {
-        portalMaterial.current.uTime += delta
+        cube.current.rotation.y += delta * 0.2
     })
+
+    const eventHandler = (event) =>
+    {
+        cube.current.material.color.set(`hsl(${Math.random() * 360}, 100%, 75%)`)
+    }
 
     return <>
 
         <OrbitControls makeDefault />
 
-        <color args={['#201919']} attach="background" />
+        <directionalLight position={ [ 1, 2, 3 ] } intensity={ 1.5 } />
+        <ambientLight intensity={ 0.5 } />
 
-        <Center>
-            <mesh geometry={ nodes.baked.geometry }>
-                <meshBasicMaterial map={ bakedTexture } />
-            </mesh>
-            <mesh geometry={ nodes.poleLightA.geometry } position={ nodes.poleLightA.position }>
-                <meshBasicMaterial color="#ffffe5" />
-            </mesh>
-            <mesh geometry={ nodes.poleLightB.geometry } position={ nodes.poleLightB.position }>
-                <meshBasicMaterial color="#ffffe5" />
-            </mesh>
-            <mesh geometry={ nodes.portalLight.geometry } position={ nodes.portalLight.position } rotation={ nodes.portalLight.rotation }>
-                {/* <shaderMaterial
-                    vertexShader={ portalVertexShader }
-                    fragmentShader={ portalFragmentShader }
-                    uniforms={{
-                        uTime: {value: 0 },
-                        uColorStart: {value: new THREE.Color('#ffffff')},
-                        uColorEnd: {value: new THREE.Color('#000000')},
-                    }}
-                /> */}
-                <portalMaterial ref={ portalMaterial } />
-            </mesh>
-            <Sparkles size={ 6 } scale={[4, 2, 4]} position-y={ 1 } speed={ 0.2 } count={ 40 } />
-        </Center>
+        <mesh position-x={ - 2 } onClick={(event) => 
+            {
+                console.log(event.object.name)
+                event.stopPropagation()
+            }}>
+            <sphereGeometry />
+            <meshStandardMaterial color="orange" />
+        </mesh>
+
+        <mesh ref={ cube } raycast={ meshBounds } position-x={ 2 } scale={ 1.5 } onClick={ eventHandler }
+             onPointerEnter={() => {document.body.style.cursor = 'pointer'}} 
+             onPointerLeave={() => {document.body.style.cursor = 'default'}}
+        >
+            <boxGeometry />
+            <meshStandardMaterial color="mediumpurple" />
+        </mesh>
+
+        <mesh position-y={ - 1 } rotation-x={ - Math.PI * 0.5 } scale={ 10 }>
+            <planeGeometry />
+            <meshStandardMaterial color="greenyellow" />
+        </mesh>
+
     </>
 }
